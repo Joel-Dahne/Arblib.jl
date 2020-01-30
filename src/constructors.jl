@@ -105,3 +105,13 @@ end
 
 #arb_set_str
 
+function Base.show(io::IO, arf::Arf)
+    y = big(1.0)
+    ccall(Arblib.@libarb(arf_get_mpfr), Cint, (Ref{BigFloat}, Ref{Arblib.Arf}, Cint), y, arf, Cint(0))
+    show(io, y)
+end
+
+function add!(res::Arf, x::Arf, y::Arf, rnd::RoundingMode=RoundNearest)
+    ccall(Arblib.@libarb(arf_add), Cint, (Ref{Arf}, Ref{Arf}, Ref{Arf}, Clong, arb_rnd), res, x, y, x.prec, rnd)
+    return res
+end
