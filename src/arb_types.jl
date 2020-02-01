@@ -111,6 +111,23 @@ mutable struct mag_struct
     end
 end
 
+const arb_ptr = Ptr{arb_struct}
+
+mutable struct arb_mat_struct
+    entries::arb_ptr
+    r::Int
+    c::Int
+    rows::Ptr{arb_ptr}
+
+    function arb_mat_struct(r::Int, c::Int)
+        res = new()
+        ccall(@libarb(arb_mat_init), Cvoid, (Ref{arb_mat_struct},Int,Int), res, r, c)
+        finalizer(clear!, res)
+        res
+    end
+end
+clear!(t::arb_mat_struct) = ccall(@libarb(arb_mat_clear), Cvoid, (Ref{arb_mat_struct},), t)
+
 for prefix in (:arf, :arb, :acb, :mag)
     arbstruct = Symbol(prefix, :_struct)
     arb_init = Symbol(prefix, :_init)
